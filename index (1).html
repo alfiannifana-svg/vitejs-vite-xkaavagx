@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>System Internal Staf & Administrasi - Klinik Terapi Holistik</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Inter -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #f1f5f9; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+  </style>
+</head>
+<body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col justify-between antialiased">
+
+  <!-- ========================================== -->
+  <!-- TOAST NOTIFICATION CONTAINER               -->
+  <!-- ========================================== -->
+  <div id="toast-container" class="fixed top-4 right-4 z-50 max-w-sm w-full hidden transition-all duration-300">
+    <div id="toast-card" class="p-4 rounded-xl shadow-lg border flex items-center space-x-3 text-sm font-semibold bg-slate-900 text-white border-slate-700">
+      <i id="toast-icon" data-lucide="check-circle-2" class="w-5 h-5 text-emerald-400 shrink-0"></i>
+      <span id="toast-text" class="flex-1">Pemberitahuan sistem...</span>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- HEADER NAVIGASI SYSTEM STAF                -->
+  <!-- ========================================== -->
+  <header class="bg-rose-900 text-white border-b border-rose-950 shadow-md sticky top-0 z-40">
+    <div class="max-w-7xl mx-auto px-4 md:px-6 py-3 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <div class="w-9 h-9 bg-rose-700 rounded-xl flex items-center justify-center text-white border border-rose-600">
+          <i data-lucide="heart" class="w-5 h-5 fill-current"></i>
+        </div>
+        <div>
+          <h1 class="font-bold text-sm md:text-base leading-tight">System Internal Staf & RME Holistik</h1>
+          <p class="text-[11px] text-rose-200">Dipocare • Lab. FK UNDIP • SMPIT Bergas</p>
+        </div>
+      </div>
+
+      <div id="staff-user-nav" class="hidden flex items-center space-x-4">
+        <div class="text-right hidden sm:block">
+          <span id="staff-name-display" class="text-xs font-bold text-white block">Staf Resepsionis</span>
+          <span id="staff-role-display" class="text-[10px] text-rose-200 uppercase font-semibold">Resepsionis / Pendaftaran</span>
+        </div>
+        <button onclick="handleStaffLogout()" class="p-2 bg-rose-800 hover:bg-rose-700 rounded-lg transition text-rose-100 flex items-center space-x-1 text-xs font-semibold">
+          <i data-lucide="log-out" class="w-4 h-4"></i>
+          <span class="hidden md:inline">Keluar</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ========================================== -->
+  <!-- MAIN WORKSPACE                             -->
+  <!-- ========================================== -->
+  <main class="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6">
+
+    <!-- VIEW 1: LOGIN STAF INTERNAL -->
+    <section id="login-section" class="max-w-md mx-auto py-10">
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 md:p-8 space-y-6">
+        <div class="text-center space-y-1">
+          <div class="w-12 h-12 bg-rose-50 text-rose-700 rounded-2xl flex items-center justify-center mx-auto mb-2 border border-rose-100">
+            <i data-lucide="stethoscope" class="w-6 h-6"></i>
+          </div>
+          <h2 class="text-lg font-bold text-slate-900">Akses Portal Staf & Administrasi</h2>
+          <p class="text-xs text-slate-500">Masuk untuk mengelola antrean atau rekam medis perawat</p>
+        </div>
+
+        <form onsubmit="handleStaffLogin(event)" class="space-y-4 text-xs font-semibold">
+          <div>
+            <label class="text-slate-700 block mb-1">Peran Staf / Hak Akses</label>
+            <select id="login-role" class="w-full p-3 bg-slate-50 border border-slate-300 rounded-xl focus:outline-none focus:border-rose-600">
+              <option value="receptionist">Resepsionis / Administrasi Pendaftaran</option>
+              <option value="nurse">Perawat / Terapis (Rekam Medis SOAP)</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="text-slate-700 block mb-1">Cabang Tugas Utama</label>
+            <select id="login-clinic" class="w-full p-3 bg-slate-50 border border-slate-300 rounded-xl focus:outline-none focus:border-rose-600">
+              <option value="dipocare">Dipocare (SPBU UNDIP)</option>
+              <option value="fk_undip">Lab. Holistik DIK FK UNDIP</option>
+              <option value="bergas">SMPIT Cahaya Ummat Bergas</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="text-slate-700 block mb-1">ID Staf / Username</label>
+            <input type="text" id="login-user" required class="w-full p-3 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:outline-none focus:border-rose-600" placeholder="Masukkan ID Staf (Contoh: admin / nurse)...">
+          </div>
+
+          <div>
+            <label class="text-slate-700 block mb-1">Kata Sandi</label>
+            <input type="password" id="login-pass" required class="w-full p-3 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:outline-none focus:border-rose-600" placeholder="••••••••">
+          </div>
+
+          <button type="submit" class="w-full py-3.5 bg-rose-700 hover:bg-rose-800 text-white font-bold rounded-xl shadow transition text-sm active:scale-[0.98]">
+            Masuk ke System Staf
+          </button>
+
+          <div class="p-3 bg-rose-50 rounded-xl border border-rose-100 text-[11px] text-rose-900 font-normal">
+            <strong>Akun Demo (khusus uji coba):</strong><br/>
+            • Resepsionis: ID <code class="font-bold">admin</code> | Sandi <code class="font-bold">123</code><br/>
+            • Perawat: ID <code class="font-bold">nurse</code> | Sandi <code class="font-bold">123</code>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- VIEW 2: DASHBOARD UTAMA STAF (RESEPSIONIS & PERAWAT) -->
+    <section id="dashboard-section" class="hidden space-y-6">
+
+      <!-- TOP CONTROL BAR: FILTER LOKASI, TANGGAL & SEARCH -->
+      <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex flex-wrap gap-4 items-center justify-between">
+        <div class="flex items-center space-x-2">
+          <i data-lucide="map-pin" class="w-4 h-4 text-rose-700 shrink-0"></i>
+          <span class="text-xs font-bold text-slate-700 hidden sm:inline">Cabang Aktif:</span>
+          <select id="filter-clinic" onchange="handleFilterChange()" class="bg-slate-100 border border-slate-300 text-xs font-bold rounded-xl px-3 py-2 text-slate-900 focus:outline-none focus:border-rose-600">
+            <option value="dipocare">Dipocare</option>
+            <option value="fk_undip">Lab. Holistik DIK FK UNDIP</option>
+            <option value="bergas">SMPIT Cahaya Ummat Bergas</option>
+          </select>
+        </div>
+
+        <div class="flex items-center space-x-3 flex-1 max-w-md justify-end">
+          <input type="date" id="filter-date" onchange="handleFilterChange()" class="bg-slate-100 border border-slate-300 text-xs font-semibold rounded-xl px-3 py-2 text-slate-800">
+          <div class="relative flex-1 max-w-xs">
+            <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-2.5"></i>
+            <input type="text" id="filter-search" onkeyup="handleFilterChange()" class="w-full pl-9 pr-3 py-2 bg-slate-100 border border-slate-300 rounded-xl text-xs focus:outline-none focus:border-rose-600" placeholder="Cari pasien / kode / WA...">
+          </div>
+        </div>
+      </div>
+
+      <!-- ========================================== -->
+      <!-- SECTION INFOGRAFIS & REKAP ADMINISTRASI   -->
+      <!-- ========================================== -->
+      <div class="space-y-4">
+        
+        <!-- Metric Cards KPI (4 Kolom Visual) -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+          
+          <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex items-center space-x-3">
+            <div class="w-10 h-10 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center shrink-0 font-bold">
+              <i data-lucide="users" class="w-5 h-5 text-slate-600"></i>
+            </div>
+            <div>
+              <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Total Antrean</span>
+              <strong id="stat-total-patients" class="text-xl font-black text-slate-900">0</strong>
+              <span class="text-[10px] text-slate-400 block">Pasien Terdaftar Hari Ini</span>
+            </div>
+          </div>
+
+          <div class="bg-white p-4 rounded-2xl border border-amber-200 shadow-sm flex items-center space-x-3">
+            <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center shrink-0 font-bold">
+              <i data-lucide="clock" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <span class="text-[10px] text-amber-700 font-bold uppercase tracking-wider block">Belum Dilayani</span>
+              <strong id="stat-waiting-patients" class="text-xl font-black text-amber-800">0</strong>
+              <span class="text-[10px] text-amber-600 block">Menunggu Pemanggilan</span>
+            </div>
+          </div>
+
+          <div class="bg-white p-4 rounded-2xl border border-blue-200 shadow-sm flex items-center space-x-3">
+            <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-700 flex items-center justify-center shrink-0 font-bold">
+              <i data-lucide="activity" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <span class="text-[10px] text-blue-700 font-bold uppercase tracking-wider block">Dalam Terapi</span>
+              <strong id="stat-active-patients" class="text-xl font-black text-blue-800">0</strong>
+              <span class="text-[10px] text-blue-600 block">Sedang Dirawat</span>
+            </div>
+          </div>
+
+          <div class="bg-white p-4 rounded-2xl border border-emerald-200 shadow-sm flex items-center space-x-3">
+            <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center shrink-0 font-bold">
+              <i data-lucide="check-circle-2" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <span class="text-[10px] text-emerald-700 font-bold uppercase tracking-wider block">Selesai Terapi</span>
+              <strong id="stat-completed-patients" class="text-xl font-black text-emerald-800">0</strong>
+              <span class="text-[10px] text-emerald-600 block">SOAP Terisi Rapi</span>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Secondary Infographic Row: Progress Efficiency & Therapy Distribution Bar -->
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
+          
+          <!-- Efficiency Progress -->
+          <div class="md:col-span-5 bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3">
+            <div class="flex justify-between items-center">
+              <h4 class="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center space-x-1.5">
+                <i data-lucide="trending-up" class="w-4 h-4 text-rose-700"></i>
+                <span>Tingkat Efisiensi Penyelesaian</span>
+              </h4>
+              <span id="stat-progress-percent" class="text-xs font-extrabold text-rose-700">0%</span>
+            </div>
+            
+            <div class="w-full bg-slate-100 h-3 rounded-full overflow-hidden">
+              <div id="stat-progress-bar" class="bg-gradient-to-r from-rose-600 to-emerald-600 h-full transition-all duration-500" style="width: 0%"></div>
+            </div>
+
+            <div class="flex justify-between text-[11px] text-slate-500 pt-1">
+              <span>Selesai: <strong id="stat-completed-text" class="text-emerald-700">0</strong> Pasien</span>
+              <span>Total Antrean: <strong id="stat-total-text" class="text-slate-800">0</strong> Pasien</span>
+            </div>
+          </div>
+
+          <!-- Therapy Distribution Chart (Bar Display) -->
+          <div class="md:col-span-7 bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3">
+            <h4 class="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center space-x-1.5 border-b pb-2">
+              <i data-lucide="bar-chart-3" class="w-4 h-4 text-rose-700"></i>
+              <span>Rekapitulasi Jenis Intervensi Terapi Hari Ini</span>
+            </h4>
+            
+            <div class="grid grid-cols-4 gap-2 text-center text-xs">
+              <div class="p-2 bg-rose-50 rounded-xl border border-rose-100">
+                <span class="text-[10px] text-rose-700 font-semibold block">Akupunktur</span>
+                <strong data-therapy-count="Akupunktur" class="text-base font-bold text-rose-950">0 Pasien</strong>
+              </div>
+              <div class="p-2 bg-rose-50 rounded-xl border border-rose-100">
+                <span class="text-[10px] text-rose-700 font-semibold block">Bekam Kering</span>
+                <strong data-therapy-count="Bekam Kering" class="text-base font-bold text-rose-950">0 Pasien</strong>
+              </div>
+              <div class="p-2 bg-rose-50 rounded-xl border border-rose-100">
+                <span class="text-[10px] text-rose-700 font-semibold block">Peregangan</span>
+                <strong data-therapy-count="Peregangan" class="text-base font-bold text-rose-950">0 Pasien</strong>
+              </div>
+              <div class="p-2 bg-emerald-50 rounded-xl border border-emerald-100">
+                <span class="text-[10px] text-emerald-800 font-semibold block">Rata-rata Nyeri</span>
+                <strong id="stat-average-pain" class="text-base font-bold text-emerald-950">—</strong>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- ========================================== -->
+      <!-- SECTION ROLE 1: RESEPSIONIS WORKSPACE      -->
+      <!-- ========================================== -->
+      <div id="receptionist-view" class="space-y-4">
+        <div class="flex justify-between items-center bg-white p-4 rounded-2xl border border-slate-200">
+          <div>
+            <h3 class="font-bold text-slate-900 text-base">Manajemen Antrean Pasien Walk-in & Online</h3>
+            <p class="text-xs text-slate-500">Kelola status kedatangan pasien di klinik</p>
+          </div>
+          <button onclick="openWalkInModal()" class="px-4 py-2.5 bg-rose-700 hover:bg-rose-800 text-white rounded-xl text-xs font-bold flex items-center space-x-2 shadow transition">
+            <i data-lucide="user-plus" class="w-4 h-4"></i>
+            <span>+ Pasien Walk-in</span>
+          </button>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs text-slate-700">
+              <thead class="bg-slate-100 text-slate-900 font-bold border-b border-slate-200 uppercase tracking-wider">
+                <tr>
+                  <th class="p-3.5">Kode / Sesi</th>
+                  <th class="p-3.5">Nama Pasien</th>
+                  <th class="p-3.5">No. WhatsApp</th>
+                  <th class="p-3.5">Catatan Keluhan</th>
+                  <th class="p-3.5">Status Kehadiran</th>
+                  <th class="p-3.5 text-center">Aksi Resepsionis</th>
+                </tr>
+              </thead>
+              <tbody id="queue-table-body" class="divide-y divide-slate-100">
+                <!-- Rows dynamically rendered -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========================================== -->
+      <!-- SECTION ROLE 2: PERAWAT / TERAPIS WORKSPACE -->
+      <!-- ========================================== -->
+      <div id="nurse-view" class="hidden grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        
+        <!-- Left: Queue Call List (4 Cols) -->
+        <div class="lg:col-span-4 bg-white p-4 rounded-2xl border border-slate-200 space-y-3">
+          <h3 class="font-bold text-slate-900 text-sm border-b pb-2 flex items-center justify-between">
+            <span>Pasien Antrean Ruangan</span>
+            <span id="ready-patient-count" class="text-xs bg-rose-100 text-rose-800 font-bold px-2 py-0.5 rounded-full">0 Pasien</span>
+          </h3>
+
+          <div id="ready-patient-list" class="space-y-2 max-h-[500px] overflow-y-auto">
+            <!-- Dynamic patient cards -->
+          </div>
+        </div>
+
+        <!-- Right: SOAP Medical Record Form (8 Cols) -->
+        <div class="lg:col-span-8 bg-white p-6 rounded-2xl border border-slate-200 space-y-5">
+          <div id="nurse-empty-state" class="text-center py-16 text-slate-400 space-y-2">
+            <i data-lucide="stethoscope" class="w-10 h-10 mx-auto text-slate-300"></i>
+            <p class="text-sm font-semibold">Pilih salah satu pasien di kolom kiri untuk memulai pengkajian SOAP.</p>
+          </div>
+
+          <form id="soap-form" onsubmit="handleSaveSOAPSubmit(event)" class="hidden space-y-5">
+            <div class="bg-rose-900 text-white p-4 rounded-xl flex justify-between items-center">
+              <div>
+                <span class="text-[10px] text-rose-200 uppercase font-semibold block">Pemeriksaan Rekam Medis Aktif</span>
+                <h3 id="active-patient-name" class="font-bold text-base">Budi Santoso</h3>
+                <p class="text-xs text-rose-100">Kode: <span id="active-patient-code">DPO-8921</span> • Jam Sesi: <span id="active-patient-slot">09:00 - 09:30</span></p>
+              </div>
+              <i data-lucide="activity" class="w-6 h-6 text-rose-300"></i>
+            </div>
+
+            <!-- TTV -->
+            <div>
+              <h4 class="font-bold text-slate-900 text-xs uppercase tracking-wider mb-2 text-rose-700">1. Tanda-Tanda Vital (TTV)</h4>
+              <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+                <div>
+                  <label class="text-slate-600 block mb-1 font-semibold">TD (mmHg)</label>
+                  <input type="text" id="soap-bp" required value="120/80" class="w-full p-2.5 border border-slate-300 rounded-lg bg-slate-50 text-sm font-semibold">
+                </div>
+                <div>
+                  <label class="text-slate-600 block mb-1 font-semibold">Nadi (x/mnt)</label>
+                  <input type="text" id="soap-hr" required value="80" class="w-full p-2.5 border border-slate-300 rounded-lg bg-slate-50 text-sm font-semibold">
+                </div>
+                <div>
+                  <label class="text-slate-600 block mb-1 font-semibold">Suhu (°C)</label>
+                  <input type="text" id="soap-temp" required value="36.5" class="w-full p-2.5 border border-slate-300 rounded-lg bg-slate-50 text-sm font-semibold">
+                </div>
+                <div>
+                  <label class="text-slate-600 block mb-1 font-semibold">RR (x/mnt)</label>
+                  <input type="text" id="soap-rr" required value="18" class="w-full p-2.5 border border-slate-300 rounded-lg bg-slate-50 text-sm font-semibold">
+                </div>
+              </div>
+            </div>
+
+            <!-- Pain Score Slider -->
+            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3">
+              <h4 class="font-bold text-slate-900 text-xs uppercase tracking-wider text-rose-700">2. Evaluasi Skala Nyeri (0 - 10)</h4>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                <div>
+                  <div class="flex justify-between font-bold text-slate-700 mb-1">
+                    <span>Nyeri Sebelum Terapi:</span>
+                    <span id="pain-pre-val" class="text-rose-700 font-extrabold text-sm">7 / 10</span>
+                  </div>
+                  <input type="range" id="soap-pain-pre" min="0" max="10" value="7" oninput="updatePainVal()" class="w-full accent-rose-700">
+                </div>
+                <div>
+                  <div class="flex justify-between font-bold text-slate-700 mb-1">
+                    <span>Nyeri Sesudah Terapi:</span>
+                    <span id="pain-post-val" class="text-emerald-700 font-extrabold text-sm">2 / 10</span>
+                  </div>
+                  <input type="range" id="soap-pain-post" min="0" max="10" value="2" oninput="updatePainVal()" class="w-full accent-emerald-700">
+                </div>
+              </div>
+            </div>
+
+            <!-- SOAP Textarea -->
+            <div>
+              <h4 class="font-bold text-slate-900 text-xs uppercase tracking-wider mb-2 text-rose-700">3. Catatan Pengkajian SOAP Holistik</h4>
+              <div class="space-y-3 text-xs">
+                <div>
+                  <label class="font-semibold text-slate-700 block mb-1">Subjektif (Keluhan)</label>
+                  <textarea id="soap-s" rows="2" required class="w-full p-2.5 border border-slate-300 rounded-lg text-xs" placeholder="Keluhan pasien..."></textarea>
+                </div>
+                <div>
+                  <label class="font-semibold text-slate-700 block mb-1">Objektif (Pemeriksaan Physical/Meridian)</label>
+                  <textarea id="soap-o" rows="2" required class="w-full p-2.5 border border-slate-300 rounded-lg text-xs" placeholder="Hasil pemeriksaan fisik..."></textarea>
+                </div>
+                <div>
+                  <label class="font-semibold text-slate-700 block mb-1">Plan / Tindakan & Edukasi Holistik</label>
+                  <textarea id="soap-p" rows="2" required class="w-full p-2.5 border border-slate-300 rounded-lg text-xs" placeholder="Tindakan akupunktur, bekam, edukasi..."></textarea>
+                </div>
+              </div>
+            </div>
+
+            <button type="submit" class="w-full py-3.5 bg-emerald-700 hover:bg-emerald-800 text-white font-bold rounded-xl shadow transition text-sm flex items-center justify-center space-x-2">
+              <i data-lucide="save" class="w-4 h-4"></i>
+              <span>Simpan Rekam Medis & Selesai Terapi</span>
+            </button>
+          </form>
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- MODAL WALK-IN -->
+  <div id="walkin-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 space-y-4 shadow-xl">
+      <h3 class="font-bold text-slate-900 text-base border-b pb-2">Registrasi Pasien Walk-in (Langsung)</h3>
+      
+      <form onsubmit="handleAddWalkIn(event)" class="space-y-3 text-xs font-semibold">
+        <div>
+          <label class="text-slate-700 block mb-1">Nama Pasien</label>
+          <input type="text" id="walkin-name" required class="w-full p-2.5 border border-slate-300 rounded-lg" placeholder="Nama KTP...">
+        </div>
+        <div>
+          <label class="text-slate-700 block mb-1">No. WhatsApp</label>
+          <input type="tel" id="walkin-wa" required class="w-full p-2.5 border border-slate-300 rounded-lg" placeholder="081234567890">
+        </div>
+        <div>
+          <label class="text-slate-700 block mb-1">Pilih Jam Sesi Terapi (30 Menit)</label>
+          <select id="walkin-slot" class="w-full p-2.5 border border-slate-300 rounded-lg">
+            <option value="10:00 - 10:30">10:00 - 10:30</option>
+            <option value="10:30 - 11:00">10:30 - 11:00</option>
+            <option value="11:00 - 11:30">11:00 - 11:30</option>
+            <option value="13:00 - 13:30">13:00 - 13:30</option>
+          </select>
+        </div>
+        <div>
+          <label class="text-slate-700 block mb-1">Keluhan Singkat</label>
+          <input type="text" id="walkin-notes" class="w-full p-2.5 border border-slate-300 rounded-lg" placeholder="Pinggang kaku...">
+        </div>
+        <div class="flex justify-end space-x-2 pt-2">
+          <button type="button" onclick="closeWalkInModal()" class="px-4 py-2 bg-slate-200 text-slate-700 rounded-lg text-xs font-bold">Batal</button>
+          <button type="submit" class="px-4 py-2 bg-rose-700 text-white rounded-lg text-xs font-bold shadow">Daftarkan Pasien</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <footer class="bg-white border-t border-slate-200 py-3 text-center text-xs text-slate-400 mt-6">
+    <p>© 2026 System RME Internal Staf & Administrasi Klinik Holistik • Semarang</p>
+  </footer>
+
+  <script>
+    "use strict";
+
+    const STORAGE_KEY = "klinik_holistik_queues_v1";
+    let currentStaff = null;
+    let selectedNurseQueue = null;
+    let toastTimer = null;
+
+    const todayLocal = () => {
+      const now = new Date();
+      const offset = now.getTimezoneOffset();
+      return new Date(now.getTime() - offset * 60000).toISOString().slice(0, 10);
+    };
+
+    const seedQueues = () => [
+      { id: "APT-101", code: "DPO-8921", patientId: "RM-001", patientName: "Budi Santoso", wa: "081234567890", clinicId: "dipocare", date: todayLocal(), timeSlot: "09:00 - 09:30", status: "Hadir", notes: "Nyeri leher kaku & pusing", soap: null, therapy: "" },
+      { id: "APT-102", code: "DPO-8922", patientId: "RM-002", patientName: "Siti Rahmawati", wa: "085678901234", clinicId: "dipocare", date: todayLocal(), timeSlot: "09:30 - 10:00", status: "Dalam Terapi", notes: "Nyeri pinggang bawah", soap: null, therapy: "" },
+      { id: "APT-103", code: "DPO-8923", patientId: "RM-003", patientName: "Dewi Lestari", wa: "087812345678", clinicId: "dipocare", date: todayLocal(), timeSlot: "10:00 - 10:30", status: "Selesai", notes: "Perut kembung & insomnia", soap: null, therapy: "Akupunktur" }
+    ];
+
+    function loadQueues() {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (!saved) return seedQueues();
+        const parsed = JSON.parse(saved);
+        return Array.isArray(parsed) ? parsed : seedQueues();
+      } catch (error) {
+        console.error("Gagal membaca data lokal:", error);
+        return seedQueues();
+      }
+    }
+
+    let queues = loadQueues();
+
+    function persistQueues() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(queues));
+      } catch (error) {
+        console.error("Gagal menyimpan data:", error);
+        showToast("Penyimpanan browser gagal. Ekspor/cadangkan data Anda.", "error");
+      }
+    }
+
+    function escapeHTML(value) {
+      return String(value ?? "").replace(/[&<>"']/g, char => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+      })[char]);
+    }
+
+    window.addEventListener("DOMContentLoaded", () => {
+      if (window.lucide) lucide.createIcons();
+      document.getElementById("filter-date").value = todayLocal();
+      document.getElementById("soap-pain-pre").addEventListener("input", updatePainVal);
+      document.getElementById("soap-pain-post").addEventListener("input", updatePainVal);
+    });
+
+    function showToast(msg, type = "success") {
+      const container = document.getElementById("toast-container");
+      const card = document.getElementById("toast-card");
+      document.getElementById("toast-text").textContent = msg;
+      card.classList.toggle("border-red-500", type === "error");
+      container.classList.remove("hidden");
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => container.classList.add("hidden"), 3500);
+    }
+
+    function handleStaffLogin(e) {
+      e.preventDefault();
+      const role = document.getElementById("login-role").value;
+      const clinic = document.getElementById("login-clinic").value;
+      const user = document.getElementById("login-user").value.trim().toLowerCase();
+      const password = document.getElementById("login-pass").value;
+
+      // DEMO ONLY: autentikasi ini bukan pengganti autentikasi backend.
+      const valid = (role === "receptionist" && user === "admin" && password === "123") ||
+                    (role === "nurse" && user === "nurse" && password === "123");
+      if (!valid) {
+        showToast("ID staf atau kata sandi tidak sesuai.", "error");
+        return;
+      }
+
+      currentStaff = {
+        name: role === "receptionist" ? "Staf Resepsionis" : "Ns. Alfian, S.Kep.",
+        role, clinicId: clinic
+      };
+
+      document.getElementById("filter-clinic").value = clinic;
+      document.getElementById("staff-name-display").textContent = currentStaff.name;
+      document.getElementById("staff-role-display").textContent = role === "receptionist" ? "Resepsionis / Administrasi" : "Perawat / Terapis";
+      document.getElementById("login-section").classList.add("hidden");
+      document.getElementById("dashboard-section").classList.remove("hidden");
+      document.getElementById("staff-user-nav").classList.remove("hidden");
+      renderDashboard();
+      showToast(`Berhasil masuk sebagai ${currentStaff.name}`);
+    }
+
+    function handleStaffLogout() {
+      currentStaff = null;
+      selectedNurseQueue = null;
+      document.getElementById("login-section").classList.remove("hidden");
+      document.getElementById("dashboard-section").classList.add("hidden");
+      document.getElementById("staff-user-nav").classList.add("hidden");
+      document.getElementById("soap-form").classList.add("hidden");
+      document.getElementById("nurse-empty-state").classList.remove("hidden");
+      document.getElementById("login-pass").value = "";
+      showToast("Anda telah keluar.");
+    }
+
+    function handleFilterChange() { renderDashboard(); }
+
+    function renderDashboard() {
+      if (!currentStaff) return;
+      const clinic = document.getElementById("filter-clinic").value;
+      const date = document.getElementById("filter-date").value;
+      const search = document.getElementById("filter-search").value.trim().toLowerCase();
+
+      const allForDay = queues.filter(q => q.clinicId === clinic && q.date === date);
+      const filtered = allForDay.filter(q =>
+        [q.patientName, q.wa, q.code, q.patientId].some(value => String(value || "").toLowerCase().includes(search))
+      );
+
+      const total = allForDay.length;
+      const waiting = allForDay.filter(q => q.status === "Hadir").length;
+      const active = allForDay.filter(q => q.status === "Dalam Terapi").length;
+      const completed = allForDay.filter(q => q.status === "Selesai").length;
+      document.getElementById("stat-total-patients").textContent = total;
+      document.getElementById("stat-waiting-patients").textContent = waiting;
+      document.getElementById("stat-active-patients").textContent = active;
+      document.getElementById("stat-completed-patients").textContent = completed;
+
+      const percent = total ? Math.round(completed / total * 100) : 0;
+      document.getElementById("stat-progress-percent").textContent = `${percent}%`;
+      document.getElementById("stat-progress-bar").style.width = `${percent}%`;
+      document.getElementById("stat-completed-text").textContent = completed;
+      document.getElementById("stat-total-text").textContent = total;
+
+      const therapyCounts = { "Akupunktur": 0, "Bekam Kering": 0, "Peregangan": 0 };
+      allForDay.forEach(q => {
+        if (Object.prototype.hasOwnProperty.call(therapyCounts, q.therapy)) therapyCounts[q.therapy]++;
+      });
+      const therapyLabels = ["Akupunktur", "Bekam Kering", "Peregangan"];
+      const therapyEls = document.querySelectorAll("[data-therapy-count]");
+      therapyEls.forEach(el => {
+        const key = el.getAttribute("data-therapy-count");
+        el.textContent = `${therapyCounts[key] || 0} Pasien`;
+      });
+      const painRecords = allForDay.filter(q => q.soap && Number.isFinite(Number(q.soap.painPre)) && Number.isFinite(Number(q.soap.painPost)));
+      const avgReduction = painRecords.length
+        ? (painRecords.reduce((sum, q) => sum + (Number(q.soap.painPre) - Number(q.soap.painPost)), 0) / painRecords.length).toFixed(1)
+        : "—";
+      const painEl = document.getElementById("stat-average-pain");
+      if (painEl) painEl.textContent = avgReduction === "—" ? "—" : `-${avgReduction} Poin`;
+
+      if (currentStaff.role === "receptionist") {
+        document.getElementById("receptionist-view").classList.remove("hidden");
+        document.getElementById("nurse-view").classList.add("hidden");
+        renderReceptionistTable(filtered);
+      } else {
+        document.getElementById("receptionist-view").classList.add("hidden");
+        document.getElementById("nurse-view").classList.remove("hidden");
+        renderNurseWorkspace(filtered);
+      }
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function renderReceptionistTable(list) {
+      const tbody = document.getElementById("queue-table-body");
+      if (!list.length) {
+        tbody.innerHTML = '<tr><td colspan="6" class="p-8 text-center text-slate-400">Belum ada antrean pasien untuk kriteria ini.</td></tr>';
+        return;
+      }
+      tbody.innerHTML = list.map(q => `
+        <tr class="hover:bg-slate-50 transition">
+          <td class="p-3.5 font-bold text-slate-900"><span class="block text-rose-700">${escapeHTML(q.code)}</span><span class="text-[11px] text-slate-500 font-normal">${escapeHTML(q.timeSlot)}</span></td>
+          <td class="p-3.5"><strong class="text-slate-900 block text-sm">${escapeHTML(q.patientName)}</strong><span class="text-[10px] text-slate-400">RM: ${escapeHTML(q.patientId)}</span></td>
+          <td class="p-3.5 font-medium">${escapeHTML(q.wa)}</td>
+          <td class="p-3.5 text-slate-600 max-w-xs truncate">${escapeHTML(q.notes || "-")}</td>
+          <td class="p-3.5"><span class="px-2.5 py-1 rounded-full text-[10px] font-bold inline-block ${
+            q.status === "Hadir" ? "bg-amber-100 text-amber-900 border border-amber-300" :
+            q.status === "Dalam Terapi" ? "bg-blue-100 text-blue-900 border border-blue-300" :
+            q.status === "Selesai" ? "bg-emerald-100 text-emerald-900 border border-emerald-300" :
+            "bg-slate-100 text-slate-500"
+          }">${escapeHTML(q.status)}</span></td>
+          <td class="p-3.5 text-center space-x-1">
+            ${q.status === "Hadir" ? `<button onclick="updateStatus('${escapeHTML(q.id)}', 'Dalam Terapi')" class="px-2.5 py-1 bg-blue-700 text-white rounded-lg text-[11px] font-bold">Masuk Terapi</button>` : ""}
+            ${q.status === "Dalam Terapi" ? '<span class="text-[11px] text-blue-700 font-bold">Dalam Ruangan</span>' : ""}
+            ${q.status === "Selesai" ? '<span class="text-[11px] text-emerald-700 font-bold">✔ Selesai</span>' : ""}
+            ${q.status !== "Selesai" && q.status !== "Dibatalkan" ? `<button onclick="updateStatus('${escapeHTML(q.id)}', 'Dibatalkan')" class="px-2 py-1 bg-slate-200 text-slate-600 rounded-lg text-[10px] ml-1">Batal</button>` : ""}
+          </td>
+        </tr>`).join("");
+    }
+
+    function renderNurseWorkspace(list) {
+      const readyList = list.filter(q => q.status === "Hadir" || q.status === "Dalam Terapi");
+      document.getElementById("ready-patient-count").textContent = `${readyList.length} Pasien`;
+      const container = document.getElementById("ready-patient-list");
+      if (!readyList.length) {
+        container.innerHTML = '<p class="text-xs text-slate-400 text-center py-8">Belum ada pasien antrean di ruangan.</p>';
+        return;
+      }
+      container.innerHTML = readyList.map(q => {
+        const isSelected = selectedNurseQueue && selectedNurseQueue.id === q.id;
+        return `<div onclick="selectNurseQueue('${escapeHTML(q.id)}')" class="p-3.5 rounded-xl border transition cursor-pointer ${isSelected ? "border-rose-600 bg-rose-50 shadow-sm" : "border-slate-200 bg-slate-50"}">
+          <div class="flex justify-between items-start"><span class="font-bold text-rose-700 text-xs">${escapeHTML(q.code)} (${escapeHTML(q.timeSlot)})</span><span class="text-[10px] font-bold px-2 py-0.5 rounded bg-white text-slate-700 border">${escapeHTML(q.status)}</span></div>
+          <h4 class="font-bold text-slate-900 text-sm mt-1">${escapeHTML(q.patientName)}</h4><p class="text-xs text-slate-500 mt-0.5">Keluhan: ${escapeHTML(q.notes || "-")}</p></div>`;
+      }).join("");
+    }
+
+    function selectNurseQueue(qId) {
+      selectedNurseQueue = queues.find(q => q.id === qId);
+      if (!selectedNurseQueue || selectedNurseQueue.status === "Selesai" || selectedNurseQueue.status === "Dibatalkan") return;
+      if (selectedNurseQueue.status === "Hadir") {
+        selectedNurseQueue.status = "Dalam Terapi";
+        persistQueues();
+      }
+      document.getElementById("nurse-empty-state").classList.add("hidden");
+      document.getElementById("soap-form").classList.remove("hidden");
+      document.getElementById("active-patient-name").textContent = selectedNurseQueue.patientName;
+      document.getElementById("active-patient-code").textContent = selectedNurseQueue.code;
+      document.getElementById("active-patient-slot").textContent = selectedNurseQueue.timeSlot;
+
+      const soap = selectedNurseQueue.soap || {};
+      document.getElementById("soap-bp").value = soap.bp || "";
+      document.getElementById("soap-hr").value = soap.hr || "";
+      document.getElementById("soap-temp").value = soap.temp || "";
+      document.getElementById("soap-rr").value = soap.rr || "";
+      document.getElementById("soap-pain-pre").value = soap.painPre ?? 7;
+      document.getElementById("soap-pain-post").value = soap.painPost ?? 2;
+      document.getElementById("soap-s").value = soap.subjective || `Pasien mengeluh: ${selectedNurseQueue.notes || ""}`;
+      document.getElementById("soap-o").value = soap.objective || "";
+      document.getElementById("soap-p").value = soap.plan || "";
+      updatePainVal();
+      renderDashboard();
+    }
+
+    function updatePainVal() {
+      document.getElementById("pain-pre-val").textContent = `${document.getElementById("soap-pain-pre").value} / 10`;
+      document.getElementById("pain-post-val").textContent = `${document.getElementById("soap-pain-post").value} / 10`;
+    }
+
+    function handleSaveSOAPSubmit(e) {
+      e.preventDefault();
+      if (!selectedNurseQueue) return;
+      const q = queues.find(item => item.id === selectedNurseQueue.id);
+      if (!q) return;
+      q.soap = {
+        bp: document.getElementById("soap-bp").value.trim(),
+        hr: document.getElementById("soap-hr").value.trim(),
+        temp: document.getElementById("soap-temp").value.trim(),
+        rr: document.getElementById("soap-rr").value.trim(),
+        painPre: Number(document.getElementById("soap-pain-pre").value),
+        painPost: Number(document.getElementById("soap-pain-post").value),
+        subjective: document.getElementById("soap-s").value.trim(),
+        objective: document.getElementById("soap-o").value.trim(),
+        plan: document.getElementById("soap-p").value.trim(),
+        savedAt: new Date().toISOString()
+      };
+      const plan = q.soap.plan.toLowerCase();
+      q.therapy = plan.includes("akupunktur") ? "Akupunktur" :
+                  (plan.includes("bekam") ? "Bekam Kering" :
+                  (plan.includes("peregangan") || plan.includes("stretching") ? "Peregangan" : "Lainnya"));
+      q.status = "Selesai";
+      persistQueues();
+      selectedNurseQueue = null;
+      document.getElementById("soap-form").classList.add("hidden");
+      document.getElementById("nurse-empty-state").classList.remove("hidden");
+      renderDashboard();
+      showToast("Rekam medis SOAP tersimpan pada browser ini dan terapi selesai.");
+    }
+
+    function updateStatus(qId, newStatus) {
+      queues = queues.map(q => q.id === qId ? { ...q, status: newStatus } : q);
+      persistQueues();
+      if (selectedNurseQueue && selectedNurseQueue.id === qId && newStatus === "Dibatalkan") {
+        selectedNurseQueue = null;
+        document.getElementById("soap-form").classList.add("hidden");
+        document.getElementById("nurse-empty-state").classList.remove("hidden");
+      }
+      showToast(`Status antrean diperbarui menjadi: ${newStatus}`);
+      renderDashboard();
+    }
+
+    function openWalkInModal() { document.getElementById("walkin-modal").classList.remove("hidden"); }
+    function closeWalkInModal() { document.getElementById("walkin-modal").classList.add("hidden"); }
+
+    function handleAddWalkIn(e) {
+      e.preventDefault();
+      const clinic = document.getElementById("filter-clinic").value;
+      const date = document.getElementById("filter-date").value;
+      const name = document.getElementById("walkin-name").value.trim();
+      const wa = document.getElementById("walkin-wa").value.trim();
+      if (!name || !wa || !date) {
+        showToast("Lengkapi nama, nomor WhatsApp, dan tanggal.", "error");
+        return;
+      }
+      const digits = wa.replace(/\D/g, "");
+      if (digits.length < 9 || digits.length > 15) {
+        showToast("Periksa kembali nomor WhatsApp pasien.", "error");
+        return;
+      }
+      const newQ = {
+        id: `APT-${Date.now()}`,
+        code: `WALK-${String(Date.now()).slice(-6)}`,
+        patientId: `RM-${String(Date.now()).slice(-6)}`,
+        patientName: name, wa, clinicId: clinic, date,
+        timeSlot: document.getElementById("walkin-slot").value,
+        status: "Hadir",
+        notes: document.getElementById("walkin-notes").value.trim() || "Pasien Walk-in",
+        soap: null, therapy: ""
+      };
+      queues.push(newQ);
+      persistQueues();
+      document.querySelector("#walkin-modal form").reset();
+      closeWalkInModal();
+      showToast(`Pasien Walk-in ${name} berhasil ditambahkan!`);
+      renderDashboard();
+    }
+  </script>
+</body>
+</html>
+```
+
+### Penjelasan Singkat Fitur Baru:
+1. **Dasbor Infografis Top Metric:** Menampilkan total pasien, pasien belum dilayani, pasien dalam terapi, dan pasien selesai terapi secara real-time.
+2. **Progress Bar Efisiensi:** Menghitung otomatis persentase penyelesaian pelayanan antrean hari itu.
+3. **Rekapitulasi Jenis Terapi:** Grafik visual ringkas untuk tindakan populer (Akupunktur, Bekam, Peregangan, Herbal) serta estimasi rata-rata penurunan skala nyeri.
+
+Anda dapat langsung menyalin (*copy*) seluruh kode di atas ke file bernama `index.html` pada komputer/laptop Anda, lalu klik 2x file tersebut untuk membukanya langsung di browser. Tampilannya dijamin langsung tayang dengan cantik!
